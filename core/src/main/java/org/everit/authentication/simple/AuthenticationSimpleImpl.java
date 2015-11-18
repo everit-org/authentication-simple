@@ -25,11 +25,11 @@ import org.everit.credential.encryptor.CredentialMatcher;
 import org.everit.persistence.querydsl.support.QuerydslSupport;
 import org.everit.resource.resolver.ResourceIdResolver;
 
-import com.mysema.query.sql.SQLQuery;
-import com.mysema.query.sql.dml.SQLDeleteClause;
-import com.mysema.query.sql.dml.SQLInsertClause;
-import com.mysema.query.sql.dml.SQLUpdateClause;
-import com.mysema.query.types.ConstructorExpression;
+import com.querydsl.core.types.Projections;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.dml.SQLDeleteClause;
+import com.querydsl.sql.dml.SQLInsertClause;
+import com.querydsl.sql.dml.SQLUpdateClause;
 
 /**
  * Implementation of {@link SimpleSubjectManager}, {@link Authenticator} and
@@ -119,10 +119,11 @@ public class AuthenticationSimpleImpl
   public Optional<Long> getResourceId(final String principal) {
     return querydslSupport.execute((connection, configuration) -> {
       QSimpleSubject qSimpleSubject = QSimpleSubject.simpleSubject;
-      Long resourceId = new SQLQuery(connection, configuration)
+      Long resourceId = new SQLQuery<Long>(connection, configuration)
+          .select(qSimpleSubject.resourceId)
           .from(qSimpleSubject)
           .where(qSimpleSubject.principal.eq(principal))
-          .singleResult(qSimpleSubject.resourceId);
+          .fetchFirst();
       return Optional.ofNullable(resourceId);
     });
   }
@@ -131,10 +132,11 @@ public class AuthenticationSimpleImpl
   public String readEncryptedCredential(final String principal) {
     return querydslSupport.execute((connection, configuration) -> {
       QSimpleSubject qSimpleSubject = QSimpleSubject.simpleSubject;
-      return new SQLQuery(connection, configuration)
+      return new SQLQuery<String>(connection, configuration)
+          .select(qSimpleSubject.encryptedCredential)
           .from(qSimpleSubject)
           .where(qSimpleSubject.principal.eq(principal))
-          .singleResult(qSimpleSubject.encryptedCredential);
+          .fetchFirst();
     });
   }
 
@@ -142,13 +144,14 @@ public class AuthenticationSimpleImpl
   public SimpleSubject readSimpleSubjectByPrincipal(final String principal) {
     return querydslSupport.execute((connection, configuration) -> {
       QSimpleSubject qSimpleSubject = QSimpleSubject.simpleSubject;
-      return new SQLQuery(connection, configuration)
-          .from(qSimpleSubject)
-          .where(qSimpleSubject.principal.eq(principal))
-          .singleResult(ConstructorExpression.create(SimpleSubject.class,
+      return new SQLQuery<SimpleSubject>(connection, configuration)
+          .select(Projections.constructor(SimpleSubject.class,
               qSimpleSubject.simpleSubjectId,
               qSimpleSubject.principal,
-              qSimpleSubject.resourceId));
+              qSimpleSubject.resourceId))
+          .from(qSimpleSubject)
+          .where(qSimpleSubject.principal.eq(principal))
+          .fetchFirst();
     });
   }
 
