@@ -16,24 +16,23 @@
     limitations under the License.
 
 -->
-<databaseChangeLog objectQuotingStrategy="QUOTE_ALL_OBJECTS" logicalFilePath="org.everit.authentication.simple"
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
-        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+<databaseChangeLog logicalFilePath="org.everit.authentication.simple" xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+  objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
-  <include file="org.everit.resource.ri.eosgi" />
+  <include file="org.everit.resource.ri.osgi" />
 
-  <changeSet id="1.0.0" author="everit">
-
+  <changeSet id="2.0.0" author="everit">
     <createTable tableName="authc_simple_subject">
       <column name="simple_subject_id" type="bigint" autoIncrement="true">
-        <constraints primaryKey="true" nullable="false" />
+        <constraints primaryKey="true" nullable="false" primaryKeyName="pk_authc_simple_subject" />
       </column>
-      <column name="principal" type="java.sql.Types.VARCHAR(256)">
-        <constraints unique="true" nullable="false" />
+      <column name="principal" type="varchar(256)">
+        <constraints unique="true" nullable="false" uniqueConstraintName="uq_authc_simple_subj_pr" />
       </column>
-      <column name="encrypted_credential" type="java.sql.Types.VARCHAR(256)">
+      <column name="encrypted_credential" type="varchar(256)">
         <constraints nullable="true" />
       </column>
       <column name="resource_id" type="bigint">
@@ -41,7 +40,7 @@
       </column>
     </createTable>
 
-    <addForeignKeyConstraint constraintName="fk_simple_subject_resource"
+    <addForeignKeyConstraint constraintName="fk_authc_simple_subj_resource"
       baseTableName="authc_simple_subject" baseColumnNames="resource_id" referencedTableName="res_resource"
       referencedColumnNames="resource_id" />
 
